@@ -5,7 +5,7 @@ public class OrderException extends RuntimeException{
     public static final int NOT_RECORD_FOUND_FOR_ID = 301;
     public static final int NOT_RECORD_FOUND_FOR_ITEM_ID = 302;
 
-    private int errorCode;
+    private final int errorCode;
 
     public OrderException(String message, int errorCode) {
         super(message);

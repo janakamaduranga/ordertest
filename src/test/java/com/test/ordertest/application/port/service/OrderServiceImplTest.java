@@ -8,8 +8,6 @@ import com.test.ordertest.application.port.out.DeleteOrderItemPort;
 import com.test.ordertest.application.port.out.LoadOrderPort;
 import com.test.ordertest.application.port.out.SaveOrderPort;
 import com.test.ordertest.util.OrderUtil;
-import static org.junit.jupiter.api.Assertions.*;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,7 +15,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
-import static org.mockito.Mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalTime;
@@ -25,8 +22,12 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
+
 @ExtendWith(MockitoExtension.class)
-public class OrderServiceImplTest {
+class OrderServiceImplTest {
 
     @Mock
     AddOrderItemPort addOrderItemPort;
@@ -57,6 +58,9 @@ public class OrderServiceImplTest {
 
     @Captor
     ArgumentCaptor<OrderItemDto> orderItemDtoArgumentCaptor;
+
+    @Captor
+    ArgumentCaptor<Long> itemIdArgumentCaptor;
 
     OrderServiceImpl orderService = null;
 
@@ -174,6 +178,88 @@ public class OrderServiceImplTest {
             assertEquals(name, orderItemDtoArgumentCaptor.getValue().getName());
             assertEquals(price, orderItemDtoArgumentCaptor.getValue().getPrice());
 
+        }
+    }
+
+    @Test
+    void addItemOutOfBusinessHoursThenException() {
+        try (MockedStatic<LocalTime> localTimeMockedStatic = mockStatic(LocalTime.class);
+             MockedStatic<OrderUtil> orderUtilMock = mockStatic(OrderUtil.class)
+        ) {
+
+            LocalTime now = LocalTime.parse("08:00:00");
+            localTimeMockedStatic.when(LocalTime::now).thenReturn(now);
+            orderUtilMock.when(() -> OrderUtil.isWithinBusinessHours(
+                    eq(now), eq(businessStartTime), eq(businessEndTime)
+            )).thenThrow(new OrderException("Out of business hours", OrderException.OUT_OF_BUSINESS_TIME));
+
+            OrderException orderException = assertThrows(OrderException.class,
+                    () -> orderService.addItem(orderId, orderItemDto));
+
+            assertEquals(OrderException.OUT_OF_BUSINESS_TIME, orderException.getErrorCode());
+
+            orderUtilMock.verify(() -> OrderUtil.isWithinBusinessHours(currentTimeCaptor.capture(),
+                    startTimeCaptor.capture(), endTimeCaptor.capture()));
+
+            assertEquals(now, currentTimeCaptor.getValue());
+            assertEquals(businessStartTime, startTimeCaptor.getValue());
+            assertEquals(businessEndTime, endTimeCaptor.getValue());
+        }
+    }
+
+    @Test
+    void deleteItemWithinBusinessHoursThenSuccess() {
+        final long ITEM_ID = 2;
+
+        try (MockedStatic<LocalTime> localTimeMockedStatic = mockStatic(LocalTime.class);
+             MockedStatic<OrderUtil> orderUtilMock = mockStatic(OrderUtil.class)
+        ) {
+
+            LocalTime now = LocalTime.parse("09:00:00");
+            localTimeMockedStatic.when(LocalTime::now).thenReturn(now);
+            orderUtilMock.when(() -> OrderUtil.isWithinBusinessHours(
+                    eq(now), eq(businessStartTime), eq(businessEndTime)
+            )).thenReturn(true);
+            when(deleteOrderItemPort.deleteOrderItem(orderId, ITEM_ID)).thenReturn(true);
+
+            orderService.deleteItem(orderId, ITEM_ID);
+            orderUtilMock.verify(() -> OrderUtil.isWithinBusinessHours(currentTimeCaptor.capture(),
+                    startTimeCaptor.capture(), endTimeCaptor.capture()));
+            verify(deleteOrderItemPort).deleteOrderItem(orderIdArgumentCaptor.capture(), itemIdArgumentCaptor.capture());
+
+            assertEquals(now, currentTimeCaptor.getValue());
+            assertEquals(businessStartTime, startTimeCaptor.getValue());
+            assertEquals(businessEndTime, endTimeCaptor.getValue());
+            assertEquals(orderId, orderIdArgumentCaptor.getValue());
+            assertEquals(ITEM_ID, itemIdArgumentCaptor.getValue());
+
+        }
+    }
+
+    @Test
+    void deleteItemOutOfBusinessHoursThenException() {
+        final long ITEM_ID = 2;
+        try (MockedStatic<LocalTime> localTimeMockedStatic = mockStatic(LocalTime.class);
+             MockedStatic<OrderUtil> orderUtilMock = mockStatic(OrderUtil.class)
+        ) {
+
+            LocalTime now = LocalTime.parse("08:00:00");
+            localTimeMockedStatic.when(LocalTime::now).thenReturn(now);
+            orderUtilMock.when(() -> OrderUtil.isWithinBusinessHours(
+                    eq(now), eq(businessStartTime), eq(businessEndTime)
+            )).thenThrow(new OrderException("Out of business hours", OrderException.OUT_OF_BUSINESS_TIME));
+
+            OrderException orderException = assertThrows(OrderException.class,
+                    () -> orderService.deleteItem(orderId, ITEM_ID));
+
+            assertEquals(OrderException.OUT_OF_BUSINESS_TIME, orderException.getErrorCode());
+
+            orderUtilMock.verify(() -> OrderUtil.isWithinBusinessHours(currentTimeCaptor.capture(),
+                    startTimeCaptor.capture(), endTimeCaptor.capture()));
+
+            assertEquals(now, currentTimeCaptor.getValue());
+            assertEquals(businessStartTime, startTimeCaptor.getValue());
+            assertEquals(businessEndTime, endTimeCaptor.getValue());
         }
     }
 

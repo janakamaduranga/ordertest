@@ -1,6 +1,11 @@
 1) How to run
-move to project root folder and run below command
+a) configure maven if you have not configured
+
+b) move to project root folder and run below command
 mvn spring-boot:run
 
-2) access http://localhost:8080/swagger-ui.htm
-to test
+2) Test application, either of below options can be used
+a) access http://localhost:8080/swagger-ui.html
+to make get, post etc: request.
+
+b) Use postman to http request

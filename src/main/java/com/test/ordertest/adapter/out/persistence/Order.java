@@ -1,6 +1,5 @@
 package com.test.ordertest.adapter.out.persistence;
 
-import com.test.ordertest.application.port.dto.OrderItemDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

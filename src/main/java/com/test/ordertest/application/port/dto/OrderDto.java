@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.validation.Valid;
 import java.io.Serializable;
 import java.util.Set;
 
@@ -12,5 +13,7 @@ import java.util.Set;
 @NoArgsConstructor
 public class OrderDto implements Serializable {
     private Long id;
+
+    @Valid
     private Set<OrderItemDto> orderItemDtoSet;
 }

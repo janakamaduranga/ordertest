@@ -54,7 +54,7 @@ public class OrderController {
     }
 
     @DeleteMapping(path = "orders/{id}/orderItems/{itemId}")
-    public ResponseEntity<Boolean> saveItem(@NotNull @PathVariable(name = "id") long id,
+    public ResponseEntity<Boolean> deleteItem(@NotNull @PathVariable(name = "id") long id,
                                                  @NotNull @PathVariable(name = "itemId") long itemId) {
         return ResponseEntity.ok(deleteItemUseCase.deleteItem(id, itemId));
     }
