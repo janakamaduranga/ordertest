@@ -22,6 +22,8 @@ public class OrderItemDto implements Serializable {
 
     private double price;
 
+    private int count = 1;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

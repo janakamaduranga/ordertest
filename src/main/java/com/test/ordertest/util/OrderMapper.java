@@ -47,6 +47,7 @@ public class OrderMapper {
         orderItem.setName(orderItemDto.getName());
         orderItem.setPrice(orderItemDto.getPrice());
         orderItem.setOrder(order);
+        orderItem.setCount(orderItemDto.getCount());
 
         return orderItem;
     }

@@ -3,10 +3,7 @@ package com.test.ordertest.application.port.service;
 import com.test.ordertest.application.exception.OrderException;
 import com.test.ordertest.application.port.dto.OrderDto;
 import com.test.ordertest.application.port.dto.OrderItemDto;
-import com.test.ordertest.application.port.out.AddOrderItemPort;
-import com.test.ordertest.application.port.out.DeleteOrderItemPort;
-import com.test.ordertest.application.port.out.LoadOrderPort;
-import com.test.ordertest.application.port.out.SaveOrderPort;
+import com.test.ordertest.application.port.out.*;
 import com.test.ordertest.util.OrderUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,6 +37,9 @@ class OrderServiceImplTest {
 
     @Mock
     SaveOrderPort saveOrderPort;
+
+    @Mock
+    UpdateOrderPort updateOrderPort;
 
     @Captor
     ArgumentCaptor<LocalTime> currentTimeCaptor;
@@ -86,7 +86,8 @@ class OrderServiceImplTest {
                 loadOrderPort,
                 saveOrderPort,
                 businessStart,
-                businessEnd
+                businessEnd,
+                updateOrderPort
                 );
 
         orderDto = new OrderDto();

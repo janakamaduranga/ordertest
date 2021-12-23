@@ -6,19 +6,18 @@ import com.test.ordertest.adapter.out.persistence.OrderRepository;
 import com.test.ordertest.application.exception.OrderException;
 import com.test.ordertest.application.port.dto.OrderDto;
 import com.test.ordertest.application.port.dto.OrderItemDto;
-import com.test.ordertest.application.port.out.AddOrderItemPort;
-import com.test.ordertest.application.port.out.DeleteOrderItemPort;
-import com.test.ordertest.application.port.out.LoadOrderPort;
-import com.test.ordertest.application.port.out.SaveOrderPort;
+import com.test.ordertest.application.port.out.*;
 import com.test.ordertest.util.OrderMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
-public class OrderJPAAdapter implements AddOrderItemPort, DeleteOrderItemPort, LoadOrderPort, SaveOrderPort {
+public class OrderJPAAdapter implements AddOrderItemPort, DeleteOrderItemPort, LoadOrderPort, SaveOrderPort, UpdateOrderPort {
 
     private static final String NO_ORDER_ID_FOUND_ERR_MESSAGE = "No record found for the given order id %s";
     private static final String NO_ORDER_ITEM_FOUND_ERR_MESSAGE = "No record found for the given order item id %s";
@@ -77,5 +76,42 @@ public class OrderJPAAdapter implements AddOrderItemPort, DeleteOrderItemPort, L
         return orderRepository.findById(id).orElseThrow(() ->
                 new OrderException(String.format(NO_ORDER_ID_FOUND_ERR_MESSAGE, id),
                         OrderException.NOT_RECORD_FOUND_FOR_ID));
+    }
+
+    @Override
+    public OrderDto updateOrder(long orderId, List<OrderItemDto> orderDtoList) {
+        Order order = getOrder(orderId);
+
+        if(CollectionUtils.isEmpty(orderDtoList)) {
+            return orderMapper.convertToOrderDto(order);
+        }
+
+        if(!CollectionUtils.isEmpty(order.getOrderItemSet())) {
+            if(!CollectionUtils.isEmpty(orderDtoList)) {
+                for (OrderItemDto orderItemDto : orderDtoList) {
+                    OrderItem savedItem = order.getOrderItemSet().stream().filter(orderItem -> orderItem.getId() == orderItemDto.getId())
+                            .findFirst().orElse(null);
+                    if(savedItem != null) {
+                        savedItem.setCount(orderItemDto.getCount());
+                    } else{
+                        order.getOrderItemSet().add(orderMapper.convertToOrderItem(order, orderItemDto));
+                    }
+                }
+            }
+
+        } else {
+            if(!CollectionUtils.isEmpty(orderDtoList)) {
+                order.setOrderItemSet(new HashSet<>());
+
+                orderDtoList.forEach(orderItemDto -> {
+                    OrderItem orderItem = orderMapper.convertToOrderItem(order,
+                            orderItemDto);
+                    order.getOrderItemSet().add(orderItem);
+                });
+
+            }
+
+        }
+        return orderMapper.convertToOrderDto(orderRepository.save(order));
     }
 }

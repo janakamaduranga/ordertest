@@ -2,10 +2,7 @@ package com.test.ordertest.adapter.in.web.controller;
 
 import com.test.ordertest.application.port.dto.OrderDto;
 import com.test.ordertest.application.port.dto.OrderItemDto;
-import com.test.ordertest.application.port.in.AddItemUseCase;
-import com.test.ordertest.application.port.in.CreateOrderUseCase;
-import com.test.ordertest.application.port.in.DeleteItemUseCase;
-import com.test.ordertest.application.port.in.GetOrderByIdUseCase;
+import com.test.ordertest.application.port.in.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -13,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 @RestController
 @RequestMapping(path = "/v1")
@@ -23,16 +21,18 @@ public class OrderController {
     private final GetOrderByIdUseCase getOrderByIdUseCase;
     private final AddItemUseCase addItemUseCase;
     private final DeleteItemUseCase deleteItemUseCase;
+    private final UpdateOrderUseCase updateOrderUseCase;
 
     public OrderController(CreateOrderUseCase createOrderUseCase,
                            GetOrderByIdUseCase getOrderByIdUseCase,
                            AddItemUseCase addItemUseCase,
-                           DeleteItemUseCase deleteItemUseCase) {
+                           DeleteItemUseCase deleteItemUseCase,
+                           UpdateOrderUseCase updateOrderUseCase) {
         this.createOrderUseCase = createOrderUseCase;
         this.getOrderByIdUseCase = getOrderByIdUseCase;
         this.addItemUseCase = addItemUseCase;
         this.deleteItemUseCase = deleteItemUseCase;
-
+        this.updateOrderUseCase = updateOrderUseCase;
     }
 
     @PostMapping(path = "orders")
@@ -57,5 +57,11 @@ public class OrderController {
     public ResponseEntity<Boolean> deleteItem(@NotNull @PathVariable(name = "id") long id,
                                                  @NotNull @PathVariable(name = "itemId") long itemId) {
         return ResponseEntity.ok(deleteItemUseCase.deleteItem(id, itemId));
+    }
+
+    @PatchMapping(path = "/orders/{id}")
+    public ResponseEntity<OrderDto> updateOrder(@NotNull @NotNull @PathVariable(name = "id") long id,
+                                                @Valid @RequestBody List<OrderItemDto> orderItemDto) {
+        return ResponseEntity.ok(updateOrderUseCase.updateOrder(id, orderItemDto));
     }
 }

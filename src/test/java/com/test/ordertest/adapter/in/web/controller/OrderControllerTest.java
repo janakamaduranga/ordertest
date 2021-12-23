@@ -4,10 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.test.ordertest.application.exception.OrderException;
 import com.test.ordertest.application.port.dto.OrderDto;
 import com.test.ordertest.application.port.dto.OrderItemDto;
-import com.test.ordertest.application.port.in.AddItemUseCase;
-import com.test.ordertest.application.port.in.CreateOrderUseCase;
-import com.test.ordertest.application.port.in.DeleteItemUseCase;
-import com.test.ordertest.application.port.in.GetOrderByIdUseCase;
+import com.test.ordertest.application.port.in.*;
 import com.test.ordertest.application.port.service.OrderServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -59,6 +56,9 @@ class OrderControllerTest {
 
     @MockBean
     DeleteItemUseCase deleteItemUseCase;
+
+    @MockBean
+    UpdateOrderUseCase updateOrderUseCase;
 
     @Captor
     ArgumentCaptor<OrderDto> orderDtoArgumentCaptor;

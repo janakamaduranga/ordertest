@@ -25,20 +25,11 @@ public class OrderItem {
     @Column(name = "price")
     private double price;
 
+    @Column(name = "count")
+    private int count;
+
     @ManyToOne
     @JoinColumn(name = "order_id")
     private Order order;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        OrderItem orderItem = (OrderItem) o;
-        return id == orderItem.id;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
 }
