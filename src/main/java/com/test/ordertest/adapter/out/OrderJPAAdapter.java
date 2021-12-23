@@ -101,8 +101,6 @@ public class OrderJPAAdapter implements AddOrderItemPort, DeleteOrderItemPort, L
 
         } else {
             if(!CollectionUtils.isEmpty(orderDtoList)) {
-                order.setOrderItemSet(new HashSet<>());
-
                 orderDtoList.forEach(orderItemDto -> {
                     OrderItem orderItem = orderMapper.convertToOrderItem(order,
                             orderItemDto);

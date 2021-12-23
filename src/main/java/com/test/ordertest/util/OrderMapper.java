@@ -44,6 +44,7 @@ public class OrderMapper {
 
     public OrderItem convertToOrderItem(Order order, OrderItemDto orderItemDto) {
         OrderItem orderItem = new OrderItem();
+        orderItem.setId(orderItemDto.getId());
         orderItem.setName(orderItemDto.getName());
         orderItem.setPrice(orderItemDto.getPrice());
         orderItem.setOrder(order);
