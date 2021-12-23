@@ -34,6 +34,7 @@ public class OrderMapper {
 
     public Order convertToOrder(OrderDto orderDto) {
         Order order = new Order();
+        order.setId(orderDto.getId());
         if(!CollectionUtils.isEmpty(orderDto.getOrderItemDtoSet())) {
             order.setOrderItemSet(orderDto.getOrderItemDtoSet().stream()
                     .map(orderItemDto -> convertToOrderItem(order, orderItemDto))
